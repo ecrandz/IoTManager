@@ -26,7 +26,7 @@
 #include "items/vSensorDallas.h"
 #include "items/vSensorUltrasonic.h"
 #include "items/vSensorDht.h"
-
+#include "items/SensorPower.h"
 void not_async_actions();
 
 Timings metric;
@@ -47,10 +47,12 @@ void setup() {
     loadConfig();
 #ifdef uartEnable
     uartInit();
+    initPowerSensor();
 #endif
     clockInit();
     timeInit();
     sensorsInit();  //Will be remooved
+
     itemsListInit();
     espInit();
     routerConnect();
@@ -102,7 +104,8 @@ void loop() {
 #endif
 
 #ifdef uartEnable
-    uartHandle();
+    // uartHandle();
+    readPowerSensor();
 #endif
 
     if (myLogging != nullptr) {

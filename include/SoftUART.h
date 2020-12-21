@@ -1,7 +1,7 @@
 #pragma once
 #include "Consts.h"
 #ifdef uartEnable
-#include "SoftwareSerial.h"
+#include <SoftwareSerial.h>
 
 extern SoftwareSerial* myUART;
 

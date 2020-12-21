@@ -1,21 +1,22 @@
 #pragma once
 #include "Global.h"
 
-#include "PZEMSensor.h"
+#include <PZEMSensor.h>
 
-class SensorPZEM {
+class SensorPower {
    public:
-    SensorPZEM(SoftwareSerial* serial, uint32_t addr, uint32_t interval, String key) : _lastUpdate{0},
-                                                                                       _interval{interval},
-                                                                                       _key{key} {
+    SensorPower(SoftwareSerial* serial, uint32_t addr, uint32_t interval, String key) : _lastUpdate{0},
+                                                                                        _interval{interval},
+                                                                                        _key{key} {
         _pzem = new PZEMSensor(serial, addr);
     }
 
-    ~SensorPZEM() {
+    ~SensorPower() {
         delete _pzem;
     }
 
     void loop(void);
+    void reset(void);
 
    private:
     void readSensor(void);
@@ -29,4 +30,12 @@ class SensorPZEM {
     String _key;
 };
 
-extern SensorPZEM* myPowerSensor;
+typedef std::vector<SensorPower*> PowerSensors;
+
+extern PowerSensors myPowerSensors;
+
+extern void resetPowerSensor();
+
+extern void initPowerSensor();
+
+extern void readPowerSensor();

@@ -12,11 +12,12 @@
 #include "items/vCountDown.h"
 #include "items/vSensorAnalog.h"
 #include "items/vSensorDht.h"
+#include "items/SensorPower.h"
 
 void loopCmdAdd(const String& cmdStr) {
     if (cmdStr.endsWith(",")) {
         orderBuf += cmdStr;
-#ifdef uartEnable    
+#ifdef uartEnable
         if (jsonReadBool(configSetupJson, "uart")) {
             if (jsonReadBool(configSetupJson, "uartEvents")) {
                 if (myUART) {
@@ -48,7 +49,7 @@ void csvCmdExecute(String& cmdStr) {
         count++;
         if (count > 1) {
             SerialPrint("I", "Items", buf);
-            String order = selectToMarker(buf, " "); //отсечка самой команды
+            String order = selectToMarker(buf, " ");  //отсечка самой команды
 
             if (order == F("button-out")) {
                 sCmd.addCommand(order.c_str(), buttonOut);
@@ -60,57 +61,48 @@ void csvCmdExecute(String& cmdStr) {
 #endif
             else if (order == F("button-in")) {
                 sCmd.addCommand(order.c_str(), buttonIn);
-            }
-            else if (order == F("inoutput")) {
+            } else if (order == F("inoutput")) {
                 sCmd.addCommand(order.c_str(), inOutput);
-            }
-            else if (order == F("analog-adc")) {
+            } else if (order == F("analog-adc")) {
                 sCmd.addCommand(order.c_str(), analogAdc);
-            }
-            else if (order == F("ultrasonic-cm")) {
+            } else if (order == F("ultrasonic-cm")) {
                 sCmd.addCommand(order.c_str(), ultrasonic);
-            }
-            else if (order == F("dallas-temp")) {
+            } else if (order == F("dallas-temp")) {
                 sCmd.addCommand(order.c_str(), dallas);
             }
 #ifdef SensorDhtEnabled
             else if (order == F("dht-temp")) {
                 sCmd.addCommand(order.c_str(), dhtTmp);
-            }
-            else if (order == F("dht-hum")) {
+            } else if (order == F("dht-hum")) {
                 sCmd.addCommand(order.c_str(), dhtHum);
             }
 #endif
 #ifdef SensorBme280Enabled
             else if (order == F("bme280-temp")) {
                 sCmd.addCommand(order.c_str(), bme280Temp);
-            }
-            else if (order == F("bme280-hum")) {
+            } else if (order == F("bme280-hum")) {
                 //sCmd.addCommand(order.c_str(), bme280Hum);
-            }
-            else if (order == F("bme280-press")) {
+            } else if (order == F("bme280-press")) {
                 sCmd.addCommand(order.c_str(), bme280Press);
             }
 #endif
 #ifdef SensorBmp280Enabled
             else if (order == F("bmp280-temp")) {
                 sCmd.addCommand(order.c_str(), bmp280Temp);
-            }
-            else if (order == F("bmp280-press")) {
+            } else if (order == F("bmp280-press")) {
                 sCmd.addCommand(order.c_str(), bmp280Press);
             }
 #endif
             else if (order == F("uptime")) {
                 sCmd.addCommand(order.c_str(), sysUptime);
-            }
-            else if (order == F("logging")) {
+            } else if (order == F("logging")) {
                 sCmd.addCommand(order.c_str(), logging);
-            }
-            else if (order == F("impuls-out")) {
+            } else if (order == F("impuls-out")) {
                 sCmd.addCommand(order.c_str(), impuls);
-            }
-            else if (order == F("count-down")) {
+            } else if (order == F("count-down")) {
                 sCmd.addCommand(order.c_str(), countDown);
+            } else if (order = F("pzem-reset")) {
+                sCmd.addCommand(order.c_str(), resetPowerSensor);
             }
 
             sCmd.readStr(buf);
@@ -188,14 +180,11 @@ String getValue(String& key) {
     String store = jsonReadStr(configStoreJson, key);
     if (live != nullptr) {
         return live;
-    }
-    else if (store != nullptr) {
+    } else if (store != nullptr) {
         return store;
-    }
-    else if (store == nullptr && live == nullptr) {
+    } else if (store == nullptr && live == nullptr) {
         return "no value";
-    }
-    else {
+    } else {
         return "data error";
     }
 }
