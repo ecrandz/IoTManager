@@ -8,154 +8,89 @@
 
 DHTesp* dht = nullptr;
 
-SensorDht::SensorDht() {}
+SensorDht::SensorDht(const paramsDht& paramsTmp, const paramsDht& paramsHum) {
+    _paramsTmp = paramsDht(paramsTmp);
+    _paramsHum = paramsDht(paramsHum);
+
+    if (!dht) {
+        dht = new DHTesp();
+    }
+
+    if (_paramsHum.type == "dht11") {
+        dht->setup(_paramsHum.pin, DHTesp::DHT11);
+    } else if (_paramsHum.type == "dht22") {
+        dht->setup(_paramsHum.pin, DHTesp::DHT22);
+    }
+
+    _paramsHum.interval = _paramsHum.interval + dht->getMinimumSamplingPeriod();
+}
 
 SensorDht::~SensorDht() {}
 
-void SensorDht::tmpInit(const tmpParams& tmpSet) {
-    _tmpSet = tmpParams(tmpSet);
-    if (!dht) {
-        dht = new DHTesp();
-    }
-    dht->setup(_tmpSet.pin, DHTesp::DHT11);
-}
-
-void SensorDht::humInit(const humParams& humSet) {
-    _humSet = humParams(humSet);
-    if (!dht) {
-        dht = new DHTesp();
-    }
-    dht->setup(_tmpSet.pin, DHTesp::DHT11);
-}
-
-void SensorDht::loopTmp() {
-    _tmpSet.currentMillis = millis();
-    _tmpSet.difference = _tmpSet.currentMillis - _tmpSet.prevMillis;
-    if (_tmpSet.difference >= _tmpSet.interval) {
-        _tmpSet.prevMillis = millis();
-        readTmp();
+void SensorDht::loop() {
+    difference = millis() - prevMillis;
+    if (difference >= _paramsHum.interval) {
+        prevMillis = millis();
+        readTmpHum();
     }
 }
 
-void SensorDht::loopHum() {
-    _humSet.currentMillis = millis();
-    _humSet.difference = _humSet.currentMillis - _humSet.prevMillis;
-    if (_humSet.difference >= _humSet.interval) {
-        _humSet.prevMillis = millis();
-        readHum();
-    }
-}
+void SensorDht::readTmpHum() {
+    float tmp = dht->getTemperature();
+    float hum = dht->getHumidity();
 
-void SensorDht::readTmp() {
-    float value;
-    static int counter;
-    if (dht->getStatus() != 0 && counter < 5) {
-        counter++;
-        SerialPrint("E", "Sensor", "Disconnected");
+    if (String(tmp) != "nan" && String(hum) != "nan") {
+        tmp = tmp * _paramsTmp.c;
+        hum = hum * _paramsHum.c;
+
+        eventGen2(_paramsTmp.key, String(tmp));
+        jsonWriteStr(configLiveJson, _paramsTmp.key, String(tmp));
+        publishStatus(_paramsTmp.key, String(tmp));
+        SerialPrint("I", "Sensor", "'" + _paramsTmp.key + "' data: " + String(tmp));
+
+        eventGen2(_paramsHum.key, String(hum));
+        jsonWriteStr(configLiveJson, _paramsHum.key, String(hum));
+        publishStatus(_paramsHum.key, String(hum));
+        SerialPrint("I", "Sensor", "'" + _paramsHum.key + "' data: " + String(hum));
+
     } else {
-        counter = 0;
-        value = dht->getTemperature();
-        if (String(value) != "nan") {
-            //value = map(value, _tmpSet.map1, _tmpSet.map2, _tmpSet.map3, _tmpSet.map4);
-            value = value * _tmpSet.c;
-            eventGen2(_tmpSet.key, String(value));
-            jsonWriteStr(configLiveJson, _tmpSet.key, String(value));
-            publishStatus(_tmpSet.key, String(value));
-            SerialPrint("I", "Sensor", "'" + _tmpSet.key + "' data: " + String(value));
-        } else {
-            SerialPrint("E", "Sensor", "'" + _tmpSet.key + "' data: " + String(value));
-        }
-    }
-}
-
-void SensorDht::readHum() {
-    float value;
-    static int counter;
-    if (dht->getStatus() != 0 && counter < 5) {
-        counter++;
-        SerialPrint("E", "Sensor", "Disconnected");
-    } else {
-        counter = 0;
-        value = dht->getHumidity();
-        if (String(value) != "nan") {
-            //value = map(value, _humSet.map1, _humSet.map2, _humSet.map3, _humSet.map4);
-            value = value * _humSet.c;
-            eventGen2(_humSet.key, String(value));
-            jsonWriteStr(configLiveJson, _humSet.key, String(value));
-            publishStatus(_humSet.key, String(value));
-            SerialPrint("I", "Sensor", "'" + _humSet.key + "' data: " + String(value));
-        } else {
-            SerialPrint("E", "Sensor", "'" + _humSet.key + "' data: " + String(value));
-        }
+        SerialPrint("E", "Sensor DHT", "Error");
     }
 }
 
 MySensorDhtVector* mySensorDht = nullptr;
 
-void dhtTmp() {
+void dhtSensor() {
     myLineParsing.update();
+    String type = myLineParsing.gtype();
     String interval = myLineParsing.gint();
     String pin = myLineParsing.gpin();
     String key = myLineParsing.gkey();
-    String map = myLineParsing.gmap();
     String c = myLineParsing.gc();
     myLineParsing.clear();
 
-    int map1 = selectFromMarkerToMarker(map, ",", 0).toInt();
-    int map2 = selectFromMarkerToMarker(map, ",", 1).toInt();
-    int map3 = selectFromMarkerToMarker(map, ",", 2).toInt();
-    int map4 = selectFromMarkerToMarker(map, ",", 3).toInt();
+    static int enterCnt = -1;
+    enterCnt++;
 
-    tmpParams buf;
+    static paramsDht paramsTmp;
+    static paramsDht paramsHum;
 
-    buf.interval = interval.toInt() * 1000;
-    buf.key = key;
-    buf.pin = pin.toInt();
-    buf.map1 = map1;
-    buf.map2 = map2;
-    buf.map3 = map3;
-    buf.map4 = map4;
-    buf.c = c.toFloat();
+    if (enterCnt == 0) {
+        paramsTmp.key = key;
+        paramsTmp.interval = interval.toInt() * 1000;
+        paramsTmp.c = c.toFloat();
+    }
 
-    dhtTmp_EnterCounter++;
+    if (enterCnt == 1) {
+        paramsHum.type = type;
+        paramsHum.key = key;
+        paramsHum.interval = interval.toInt() * 1000;
+        paramsHum.pin = pin.toInt();
+        paramsHum.c = c.toFloat();
 
-    static bool firstTime = true;
-    if (firstTime) mySensorDht = new MySensorDhtVector();
-    firstTime = false;
-    mySensorDht->push_back(SensorDht());
-    mySensorDht->at(dhtTmp_EnterCounter).tmpInit(buf);
-}
-
-void dhtHum() {
-    myLineParsing.update();
-    String interval = myLineParsing.gint();
-    String pin = myLineParsing.gpin();
-    String key = myLineParsing.gkey();
-    String map = myLineParsing.gmap();
-    String c = myLineParsing.gc();
-    myLineParsing.clear();
-
-    int map1 = selectFromMarkerToMarker(map, ",", 0).toInt();
-    int map2 = selectFromMarkerToMarker(map, ",", 1).toInt();
-    int map3 = selectFromMarkerToMarker(map, ",", 2).toInt();
-    int map4 = selectFromMarkerToMarker(map, ",", 3).toInt();
-
-    humParams buf;
-
-    buf.interval = interval.toInt() * 1000;
-    buf.key = key;
-    buf.pin = pin.toInt();
-    buf.map1 = map1;
-    buf.map2 = map2;
-    buf.map3 = map3;
-    buf.map4 = map4;
-    buf.c = c.toFloat();
-
-    dhtHum_EnterCounter++;
-
-    static bool firstTime = true;
-    if (firstTime) mySensorDht = new MySensorDhtVector();
-    firstTime = false;
-    mySensorDht->push_back(SensorDht());
-    mySensorDht->at(dhtHum_EnterCounter).humInit(buf);
+        static bool firstTime = true;
+        if (firstTime) mySensorDht = new MySensorDhtVector();
+        firstTime = false;
+        mySensorDht->push_back(SensorDht(paramsTmp, paramsHum));
+    }
 }

@@ -10,54 +10,30 @@ class SensorDht;
 
 typedef std::vector<SensorDht> MySensorDhtVector;
 
-struct tmpParams {
-    unsigned long currentMillis;
-    unsigned long prevMillis;
-    unsigned long difference;
-    unsigned long interval;
+struct paramsDht {
+    String type;
     String key;
-    unsigned int pin;
-    int map1;
-    int map2;
-    int map3;
-    int map4;
-    float c;
-};
-
-struct humParams {
-    unsigned long currentMillis;
-    unsigned long prevMillis;
-    unsigned long difference;
     unsigned long interval;
-    String key;
     unsigned int pin;
-    int map1;
-    int map2;
-    int map3;
-    int map4;
     float c;
 };
 
 class SensorDht {
    public:
-    SensorDht();
+    SensorDht(const paramsDht& paramsTmp, const paramsDht& paramsHum);
     ~SensorDht();
 
-    void loopTmp();
-    void loopHum();
-
-    void readTmp();
-    void readHum();
-
-    void tmpInit(const tmpParams& tmpSet);
-    void humInit(const humParams& humSet);
+    void loop();
+    void readTmpHum();
 
    private:
-    tmpParams _tmpSet;
-    humParams _humSet;
+    paramsDht _paramsTmp;
+    paramsDht _paramsHum;
+    
+    unsigned long prevMillis;
+    unsigned long difference;
 };
 
 extern MySensorDhtVector* mySensorDht;
 
-extern void dhtTmp();
-extern void dhtHum();
+extern void dhtSensor();

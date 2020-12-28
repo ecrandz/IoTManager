@@ -13,6 +13,7 @@
 #include "items/vSensorAnalog.h"
 #include "items/vSensorDht.h"
 #include "items/SensorPower.h"
+#include "items/vSensorBme280.h"
 
 void loopCmdAdd(const String& cmdStr) {
     if (cmdStr.endsWith(",")) {
@@ -71,26 +72,13 @@ void csvCmdExecute(String& cmdStr) {
                 sCmd.addCommand(order.c_str(), dallas);
             }
 #ifdef SensorDhtEnabled
-            else if (order == F("dht-temp")) {
-                sCmd.addCommand(order.c_str(), dhtTmp);
-            } else if (order == F("dht-hum")) {
-                sCmd.addCommand(order.c_str(), dhtHum);
+            else if (order == F("dht")) {
+                sCmd.addCommand(order.c_str(), dhtSensor);
             }
 #endif
 #ifdef SensorBme280Enabled
-            else if (order == F("bme280-temp")) {
-                sCmd.addCommand(order.c_str(), bme280Temp);
-            } else if (order == F("bme280-hum")) {
-                //sCmd.addCommand(order.c_str(), bme280Hum);
-            } else if (order == F("bme280-press")) {
-                sCmd.addCommand(order.c_str(), bme280Press);
-            }
-#endif
-#ifdef SensorBmp280Enabled
-            else if (order == F("bmp280-temp")) {
-                sCmd.addCommand(order.c_str(), bmp280Temp);
-            } else if (order == F("bmp280-press")) {
-                sCmd.addCommand(order.c_str(), bmp280Press);
+            else if (order == F("bme280")) {
+                sCmd.addCommand(order.c_str(), bme280Sensor);
             }
 #endif
             else if (order == F("uptime")) {
@@ -105,7 +93,6 @@ void csvCmdExecute(String& cmdStr) {
                 sCmd.addCommand("pzem-reset", resetPowerSensor);
             }
 
-            sCmd.readStr(buf);
             sCmd.readStr(buf);
         }
         cmdStr = deleteBeforeDelimiter(cmdStr, "\n");
@@ -130,31 +117,6 @@ void loopCmdExecute() {
         sCmd.readStr(tmp);                                //выполняем
         orderBuf = deleteBeforeDelimiter(orderBuf, ",");  //осекаем
     }
-}
-
-void sensorsInit() {
-    ts.add(
-        SENSORS10SEC, 10000, [&](void*) {
-            String buf = sensorReadingMap10sec;
-            while (buf.length()) {
-                String tmp = selectToMarker(buf, ",");
-                sCmd.readStr(tmp);
-                buf = deleteBeforeDelimiter(buf, ",");
-            }
-        },
-        nullptr, true);
-
-    ts.add(
-        SENSORS30SEC, 30000, [&](void*) {
-            String buf = sensorReadingMap30sec;
-            while (buf.length()) {
-                String tmp = selectToMarker(buf, ",");
-                sCmd.readStr(tmp);
-                buf = deleteBeforeDelimiter(buf, ",");
-            }
-        },
-        nullptr, true);
-    SerialPrint("I", F("Sensors"), F("Sensors Init"));
 }
 
 void addKey(String& key, String& keyNumberTable, int number) {

@@ -1,8 +1,8 @@
 #pragma once
 //===================Libraries===================================================================================================================================================
 #include "Consts.h"
-#include <Adafruit_BME280.h>
-#include <Adafruit_BMP280.h>
+
+
 #include <Arduino.h>
 #include "CTBot.h"
 #include <ArduinoJson.h>
@@ -88,13 +88,10 @@ extern int countDown_EnterCounter;
 extern String logging_KeyList;
 extern int logging_EnterCounter;
 //=========================================
-extern int dhtTmp_EnterCounter;
-extern int dhtHum_EnterCounter;
+extern int dht_EnterCounter;
 //=========================================
 
-// Sensors
-extern String sensorReadingMap10sec;
-extern String sensorReadingMap30sec;
+
 
 extern String itemName;
 extern String presetName;
