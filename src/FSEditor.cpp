@@ -242,7 +242,9 @@ void FSEditor::handleRequest(AsyncWebServerRequest *request) {
         if (request->hasParam("path", true)) {
             if (!(_fs.remove(request->getParam("path", true)->value()))) {
 #ifdef ESP32
+#if USE_LITTLEFS
                 _fs.rmdir(request->getParam("path", true)->value());  // try rmdir for littlefs
+#endif
 #endif
             }
 

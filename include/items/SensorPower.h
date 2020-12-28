@@ -5,7 +5,7 @@
 
 class SensorPower {
    public:
-    SensorPower(SoftwareSerial* serial, uint32_t addr, uint32_t interval, String key) : _lastUpdate{0},
+    SensorPower(Stream* serial, uint32_t addr, uint32_t interval, String key) : _lastUpdate{0},
                                                                                         _interval{interval},
                                                                                         _key{key} {
         _pzem = new PZEMSensor(serial, addr);

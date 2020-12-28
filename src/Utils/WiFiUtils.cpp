@@ -18,7 +18,12 @@ void routerConnect() {
     }
     else {
         WiFi.begin(_ssid.c_str(), _password.c_str());
+        #ifdef ESP32
+        WiFi.setTxPower(WIFI_POWER_19_5dBm);
+        #else
         WiFi.setOutputPower(20.5);
+        #endif
+        
         SerialPrint("I", "WIFI", "ssid: " + _ssid);
     }
 

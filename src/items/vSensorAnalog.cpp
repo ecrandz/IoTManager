@@ -1,8 +1,10 @@
-#include "items/vSensorAnalog.h"
-#include "Class/LineParsing.h"
+#include <Arduino.h>
+
 #include "Global.h"
 #include "BufferExecute.h"
-#include <Arduino.h>
+#include "items/vSensorAnalog.h"
+#include "Class/LineParsing.h"
+
 
 SensorAnalog::SensorAnalog(String key, unsigned long interval, unsigned int adcPin, int map1, int map2, int map3, int map4, float c) {
     _interval = interval * 1000;
@@ -31,8 +33,7 @@ void SensorAnalog::loop() {
 void SensorAnalog::readAnalog() {
     int value;
 #ifdef ESP32
-    int pinInt = pin.toInt();
-    value = analogRead(pinInt);
+    value = analogRead(_adcPin);
 #endif
 #ifdef ESP8266
     value = analogRead(A0);

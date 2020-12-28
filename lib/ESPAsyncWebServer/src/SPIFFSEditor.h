@@ -1,11 +1,6 @@
 #ifndef SPIFFSEditor_H_
 #define SPIFFSEditor_H_
 #include <ESPAsyncWebServer.h>
-
-#ifdef ESP8266
-#include <LittleFS.h>
-#endif
-
 class SPIFFSEditor : public AsyncWebHandler {
    private:
     fs::FS _fs;

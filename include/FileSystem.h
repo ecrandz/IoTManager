@@ -8,6 +8,14 @@
 
 #include <FS.h>
 
+#ifdef ESP32
+#include <SPIFFS.h>
+extern FS* filesystem;
+#define FileFS SPIFFS
+#define FS_NAME "SPIFFS"
+#endif
+
+#ifdef ESP8266
 #if USE_LITTLEFS
 #include <LittleFS.h>
 extern FS LittleFS;
@@ -20,7 +28,6 @@ extern FS* filesystem;
 #define FileFS SPIFFS
 #define FS_NAME "SPIFFS"
 #endif
-
+#endif
 
 extern void getFSInfo();
-extern bool getInfo(FSInfo& info);

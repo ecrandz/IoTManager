@@ -37,7 +37,7 @@ void printBuf(uint8_t *buffer, uint16_t len) {
 #endif
 }
 
-PZEMSensor::PZEMSensor(SoftwareSerial *port, uint16_t addr) {
+PZEMSensor::PZEMSensor(Stream *port, uint16_t addr) {
     _serial = port;
     _addr = addr;
     init();
