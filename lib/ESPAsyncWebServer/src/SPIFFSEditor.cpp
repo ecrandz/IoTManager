@@ -379,7 +379,7 @@ static bool isExcluded(fs::FS &_fs, const char *filename) {
 #ifdef ESP32
 SPIFFSEditor::SPIFFSEditor(const fs::FS& fs, const String& username, const String& password)
 #else
-#if USE_LITTLE_FS
+#if USE_LITTLEFS
   SPIFFSEditor::SPIFFSEditor(const String& username, const String& password, const fs::FS&)
 #else
   SPIFFSEditor::SPIFFSEditor(const fs::FS& fs, const String& username, const String& password)

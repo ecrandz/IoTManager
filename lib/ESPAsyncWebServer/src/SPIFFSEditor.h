@@ -1,6 +1,11 @@
 #ifndef SPIFFSEditor_H_
 #define SPIFFSEditor_H_
+
 #include <ESPAsyncWebServer.h>
+
+#if USE_LITTLEFS
+#include <LittleFS.h>
+#endif
 
 class SPIFFSEditor : public AsyncWebHandler {
    private:
@@ -14,7 +19,7 @@ class SPIFFSEditor : public AsyncWebHandler {
 #ifdef ESP32
     SPIFFSEditor(const fs::FS& fs, const String& username = String(), const String& password = String());
 #else
-    #if USE_LITTLEFS
+    #if USE_LITTLEFS        
         SPIFFSEditor(const String& username = String(), const String& password = String(), const fs::FS& fs = LittleFS);
     #else 
         SPIFFSEditor(const fs::FS& fs, const String& username = String(), const String& password = String());        
