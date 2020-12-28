@@ -101,10 +101,11 @@ void csvCmdExecute(String& cmdStr) {
                 sCmd.addCommand(order.c_str(), impuls);
             } else if (order == F("count-down")) {
                 sCmd.addCommand(order.c_str(), countDown);
-            } else if (order = F("pzem-reset")) {
-                sCmd.addCommand(order.c_str(), resetPowerSensor);
+            } else if (order.startsWith("pzem-reset")) {
+                sCmd.addCommand("pzem-reset", resetPowerSensor);
             }
 
+            sCmd.readStr(buf);
             sCmd.readStr(buf);
         }
         cmdStr = deleteBeforeDelimiter(cmdStr, "\n");
