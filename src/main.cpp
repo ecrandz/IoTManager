@@ -28,6 +28,7 @@
 #include "items/vSensorUltrasonic.h"
 #include "items/vSensorBme280.h"
 #include "items/vSensorBmp280.h"
+#include "items/SensorPower.h"
 
 void not_async_actions();
 
