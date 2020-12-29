@@ -14,6 +14,7 @@
 #include "items/vSensorDht.h"
 #include "items/SensorPower.h"
 #include "items/vSensorBme280.h"
+#include "items/vSensorBmp280.h"
 
 void loopCmdAdd(const String& cmdStr) {
     if (cmdStr.endsWith(",")) {
@@ -79,6 +80,11 @@ void csvCmdExecute(String& cmdStr) {
 #ifdef SensorBme280Enabled
             else if (order == F("bme280")) {
                 sCmd.addCommand(order.c_str(), bme280Sensor);
+            }
+#endif
+#ifdef SensorBmp280Enabled
+            else if (order == F("bmp280")) {
+                sCmd.addCommand(order.c_str(), bmp280Sensor);
             }
 #endif
             else if (order == F("uptime")) {
