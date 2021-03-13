@@ -20,6 +20,12 @@ int jsonReadInt(String& json, String name) {
     return root[name];
 }
 
+int64_t jsonReadLong(String& json, String name) {
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& root = jsonBuffer.parseObject(json);
+    return root[name].as<int64_t>();
+}
+
 String jsonWriteStr(String& json, String name, String value) {
     DynamicJsonBuffer jsonBuffer;
     JsonObject& root = jsonBuffer.parseObject(json);
@@ -34,6 +40,15 @@ String jsonWriteBool(String& json, String name, boolean value) {
 }
 
 String jsonWriteInt(String& json, String name, int value) {
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& root = jsonBuffer.parseObject(json);
+    root[name] = value;
+    json = "";
+    root.printTo(json);
+    return json;
+}
+
+String jsonWriteLong(String& json, String name, int64_t value) {
     DynamicJsonBuffer jsonBuffer;
     JsonObject& root = jsonBuffer.parseObject(json);
     root[name] = value;
