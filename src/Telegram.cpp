@@ -38,6 +38,9 @@ void handleTelegram() {
                     prevMillis = millis();
                     if (myBot->getNewMessage(msg)) {
                         chatID=msg.sender.id;
+                        if (msg.group.id<0) {
+                            chatID=msg.group.id;
+                        }
                         sprintf(workstr, "%lld", chatID);
                         SerialPrint("->", "Telegram", "chat ID: " + String(workstr) + ", msg: " + String(msg.text));
                         if (jsonReadBool(configSetupJson, "autos")) {
@@ -82,7 +85,7 @@ void sendTelegramMsg() {
     sprintf(workstr, "%lld", chatID);
     if (sabject == "often") {
         msg.replace("#", " ");
-        myBot->sendMessage(jsonReadLong(configSetupJson, "chatId"), msg);
+        myBot->sendMessage(chatID, msg);
         SerialPrint("<-", "Telegram", "chat ID: " + String(workstr) + ", msg: " + msg);
     } else {
         String prevMsg = jsonReadStr(telegramMsgJson, sabject);
