@@ -53,12 +53,12 @@ void handleTelegram() {
 }
 
 void telegramMsgParse(String msg) {
+    chatID=jsonReadLong(configSetupJson, "chatId");
+    sprintf(workstr, "%lld", chatID);
     if (msg.indexOf("set") != -1) {
         msg = deleteBeforeDelimiter(msg, "_");
         msg.replace("_", " ");
         loopCmdAdd(String(msg) + ",");
-        chatID=jsonReadLong(configSetupJson, "chatId");
-        sprintf(workstr, "%lld", chatID);
         myBot->sendMessage(chatID, "order done");
         SerialPrint("<-", "Telegram", "chat ID: " + String(workstr) + ", msg: " + String(msg));
     } else if (msg.indexOf("get") != -1) {
